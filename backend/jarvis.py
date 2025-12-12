@@ -207,7 +207,7 @@ def handle_command(cmd: str) -> str:
     if "list notes" in cmd or "show notes" in cmd:
         return speak(list_notes())
 
-    m = re.search(r"remind me in (\d+)\s*(minutes|minute|min)\s*(.*)", cmd)
+    m = re.search(r"remind me (?:in|after) (\d+)\s*(minutes|minute|min)\s*(.*)", cmd)
     if m:
         minutes = int(m.group(1))
         msg = m.group(3).strip() or "No message"

@@ -2,130 +2,467 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>J.A.R.V.I.S Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>J.A.R.V.I.S Voice Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    body {
+    * {
       margin: 0;
-      background: #0a0f14;
-      font-family: "Orbitron", sans-serif;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(ellipse at center, #0a1628 0%, #020508 100%);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      overflow: hidden;
+      position: relative;
     }
 
-    .chat-container {
-      width: 400px;
-      height: 600px;
-      background: #111;
-      border: 2px solid cyan;
-      border-radius: 15px;
+    /* Animated background particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(0, 255, 255, 0.4);
+      border-radius: 50%;
+      animation: float 20s infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+    }
+
+    /* Main container */
+    .jarvis-container {
+      position: relative;
+      z-index: 10;
+      width: 90%;
+      max-width: 1200px;
+      height: 80vh;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 20, 40, 0.6);
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+      animation: scan 3s linear infinite;
+    }
+
+    @keyframes scan {
+      0% { transform: translateX(-100%) translateY(-100%); }
+      100% { transform: translateX(100%) translateY(100%); }
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      font-weight: 900;
+      color: #00ffff;
+      text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+      letter-spacing: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header p {
+      color: #4dd0e1;
+      font-size: 0.9em;
+      margin-top: 5px;
+      letter-spacing: 2px;
+    }
+
+    /* Main content area */
+    .main-content {
+      display: flex;
+      gap: 20px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Voice visualizer */
+    .visualizer-panel {
+      flex: 1;
+      background: rgba(0, 20, 40, 0.6);
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Circular visualizer */
+    .voice-circle {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+      border: 3px solid rgba(0, 255, 255, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      animation: pulse 2s ease-in-out infinite;
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.4), inset 0 0 40px rgba(0, 255, 255, 0.2);
+    }
+
+    .voice-circle.active {
+      animation: pulseActive 0.8s ease-in-out infinite;
+      border-color: #00ffff;
+      box-shadow: 0 0 60px rgba(0, 255, 255, 0.8), inset 0 0 60px rgba(0, 255, 255, 0.4);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+
+    @keyframes pulseActive {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .voice-circle::before {
+      content: '';
+      position: absolute;
+      width: 120%;
+      height: 120%;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 255, 255, 0.2);
+      animation: ripple 3s linear infinite;
+    }
+
+    @keyframes ripple {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    .mic-icon {
+      font-size: 80px;
+      color: #00ffff;
+      cursor: pointer;
+      transition: all 0.3s;
+      filter: drop-shadow(0 0 20px #00ffff);
+      user-select: none;
+    }
+
+    .mic-icon:hover {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 30px #00ffff);
+    }
+
+    .status-text {
+      margin-top: 30px;
+      font-size: 1.2em;
+      color: #00ffff;
+      text-align: center;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #00ffff;
+    }
+
+    /* Chat panel */
+    .chat-panel {
+      flex: 1;
+      background: rgba(0, 20, 40, 0.6);
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
     }
 
-    .chat-box {
+    .chat-header {
+      padding: 15px 20px;
+      background: rgba(0, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+      color: #00ffff;
+      font-weight: bold;
+      letter-spacing: 2px;
+    }
+
+    .chat-messages {
       flex: 1;
-      padding: 15px;
+      padding: 20px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 15px;
     }
 
-    .bubble {
-      max-width: 70%;
-      padding: 10px 14px;
-      border-radius: 18px;
-      font-size: 14px;
-      line-height: 1.4;
-      animation: fadeIn 0.3s ease-in;
+    .chat-messages::-webkit-scrollbar {
+      width: 8px;
     }
 
-    .user {
+    .chat-messages::-webkit-scrollbar-track {
+      background: rgba(0, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 255, 0.5);
+      border-radius: 10px;
+    }
+
+    .message {
+      padding: 12px 18px;
+      border-radius: 15px;
+      max-width: 80%;
+      animation: slideIn 0.4s ease-out;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
       align-self: flex-end;
-      background: #0078ff;
+      background: linear-gradient(135deg, #0066cc 0%, #0099ff 100%);
       color: white;
-      border-bottom-right-radius: 4px;
+      border-bottom-right-radius: 5px;
+      box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
     }
 
-    .jarvis {
+    .message.jarvis {
       align-self: flex-start;
-      background: #00c896;
-      color: black;
-      border-bottom-left-radius: 4px;
+      background: linear-gradient(135deg, #00a896 0%, #00d4aa 100%);
+      color: #001a14;
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 4px 15px rgba(0, 168, 150, 0.3);
+      font-weight: 500;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
+    .message::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
     }
 
-    .speak-btn {
-      background: cyan;
-      color: black;
-      text-align: center;
-      padding: 12px;
-      cursor: pointer;
+    .message:hover::before {
+      left: 100%;
+    }
+
+    /* Control buttons */
+    .controls {
+      padding: 20px;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      background: rgba(0, 255, 255, 0.05);
+      border-top: 1px solid rgba(0, 255, 255, 0.3);
+    }
+
+    .btn {
+      padding: 12px 30px;
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.4));
+      border: 2px solid #00ffff;
+      border-radius: 10px;
+      color: #00ffff;
+      font-family: 'Orbitron', sans-serif;
       font-weight: bold;
-      font-size: 16px;
-      text-shadow: 0 0 8px #00ffff;
-      transition: 0.3s;
+      cursor: pointer;
+      transition: all 0.3s;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px #00ffff;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
     }
-    .speak-btn:hover {
-      background: #00aabb;
-      color: white;
+
+    .btn:hover {
+      background: linear-gradient(135deg, rgba(0, 255, 255, 0.4), rgba(0, 255, 255, 0.6));
+      transform: translateY(-2px);
+      box-shadow: 0 5px 25px rgba(0, 255, 255, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .main-content {
+        flex-direction: column;
+      }
+      
+      .voice-circle {
+        width: 200px;
+        height: 200px;
+      }
+
+      .mic-icon {
+        font-size: 60px;
+      }
+
+      .header h1 {
+        font-size: 1.8em;
+        letter-spacing: 4px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-box" id="chatBox"></div>
-    <div class="speak-btn" id="speakBtn">🎤 CLICK TO SPEAK</div>
+  <div class="particles" id="particles"></div>
+
+  <div class="jarvis-container">
+    <div class="header">
+      <h1>J.A.R.V.I.S</h1>
+      <p>Just A Rather Very Intelligent System</p>
+    </div>
+
+    <div class="main-content">
+      <div class="visualizer-panel">
+        <div class="voice-circle" id="voiceCircle">
+          <div class="mic-icon" id="micIcon">🎤</div>
+        </div>
+        <div class="status-text" id="statusText">Click microphone to speak</div>
+      </div>
+
+      <div class="chat-panel">
+        <div class="chat-header">CONVERSATION LOG</div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="message jarvis">
+            Hello! I'm JARVIS, your personal AI assistant. How may I assist you today?
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn" id="speakBtn">🎤 SPEAK</button>
+          <button class="btn" id="clearBtn">🗑️ CLEAR</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
+    // Create animated particles
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      for (let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.width = Math.random() * 4 + 2 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    createParticles();
+
+    // Speech recognition setup
+    let recognition;
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+    }
+
+    const chatMessages = document.getElementById('chatMessages');
+    const statusText = document.getElementById('statusText');
+    const voiceCircle = document.getElementById('voiceCircle');
+    const micIcon = document.getElementById('micIcon');
+
+    function addMessage(text, type) {
+      const message = document.createElement('div');
+      message.className = `message ${type}`;
+      message.textContent = text;
+      chatMessages.appendChild(message);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
     async function sendCommand(command) {
-      addMessage("🧑 " + command, "user");
+      addMessage(command, 'user');
+      statusText.textContent = 'Processing...';
+      
       try {
-        const response = await fetch("http://127.0.0.1:5000/command", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const response = await fetch('http://127.0.0.1:5000/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: command })
         });
+        
         const data = await response.json();
-        addMessage("🤖 " + data.response, "jarvis");
+        addMessage(data.response, 'jarvis');
+        statusText.textContent = 'Click microphone to speak';
 
-        // Speak out Jarvis reply
-        const utterance = new SpeechSynthesisUtterance(data.response);
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
-
+        // Text-to-speech
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(data.response);
+          utterance.rate = 0.9;
+          utterance.pitch = 1;
+          speechSynthesis.cancel();
+          speechSynthesis.speak(utterance);
+        }
       } catch (err) {
-        addMessage("❌ Error connecting to backend", "jarvis");
+        addMessage('Error: Unable to connect to backend server', 'jarvis');
+        statusText.textContent = 'Connection error';
         console.error(err);
       }
     }
 
-    function addMessage(msg, type) {
-      const chatBox = document.getElementById("chatBox");
-      const div = document.createElement("div");
-      div.className = "bubble " + type;
-      div.innerHTML = msg;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
     function startListening() {
-      const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = "en-US";
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
+      if (!recognition) {
+        addMessage('Speech recognition not supported in this browser', 'jarvis');
+        return;
+      }
 
       recognition.start();
-      document.getElementById("speakBtn").textContent = "🎤 Listening...";
+      statusText.textContent = 'Listening...';
+      voiceCircle.classList.add('active');
+      micIcon.textContent = '🔴';
 
       recognition.onresult = function(event) {
         const command = event.results[0][0].transcript;
@@ -133,16 +470,25 @@
       };
 
       recognition.onerror = function(event) {
-        addMessage("⚠️ Error: " + event.error, "jarvis");
+        addMessage(`Error: ${event.error}`, 'jarvis');
+        statusText.textContent = 'Error occurred';
+        voiceCircle.classList.remove('active');
+        micIcon.textContent = '🎤';
       };
 
       recognition.onend = function() {
-        document.getElementById("speakBtn").textContent = "🎤 CLICK TO SPEAK";
+        statusText.textContent = 'Click microphone to speak';
+        voiceCircle.classList.remove('active');
+        micIcon.textContent = '🎤';
       };
     }
 
-    document.getElementById("speakBtn").addEventListener("click", () => {
-      startListening();
+    // Event listeners
+    document.getElementById('speakBtn').addEventListener('click', startListening);
+    document.getElementById('micIcon').addEventListener('click', startListening);
+    
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      chatMessages.innerHTML = '<div class="message jarvis">Conversation cleared. How may I assist you?</div>';
     });
   </script>
 </body>
